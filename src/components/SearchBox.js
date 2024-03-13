@@ -1,7 +1,12 @@
-const SearchBox = () => {
+const SearchBox = ({ searchChange, onSearchChange }) => {
   return (
-    <div>
-      <input type="search" placeholder="find a robot" />
+    <div className="pa2">
+      <input
+        className="pa3 ba b--green bg--lightest-blue"
+        type="search"
+        placeholder="find a robot"
+        onChange={searchChange}
+      />
     </div>
   );
 };
