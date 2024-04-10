@@ -1,55 +1,40 @@
-import { useEffect, useState } from "react";
-import { Provider } from "react-redux";
-import { createStore, applyMiddleware, combineReducers } from "redux";
-import { searchRobots, requestRobots } from "./redux/reducers";
-import thunkMiddleware from "redux-thunk";
-import CardList from "./components/CardList";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { setSearchField, requestRobots } from "./redux/actions";
 import Layout from "./components/Layout";
-import SearchBox from "./components/SearchBox";
 import Title from "./components/Title";
+import SearchBox from "./components/SearchBox";
 import Scroll from "./components/Scroll";
-import { robots } from "./robots";
-
-const rootReducer = combineReducers({ searchRobots, requestRobots });
-const store = createStore(rootReducer, applyMiddleware(thunkMiddleware));
+import CardList from "./components/CardList";
 
 function App() {
-  const [InitRobots, setRobots] = useState([]);
-  const [searchField, setSearchField] = useState("");
+  const dispatch = useDispatch();
 
-  // useEffect(() => {
-  //   fetch("https://jsonplaceholder.typicode.com/users")
-  //     .then((response) => response.json())
-  //     .then((users) => setRobots(users));
-  // }, []);
+  useEffect(() => {
+    dispatch(requestRobots());
+  }, [dispatch]);
 
-  const filteredRobots = InitRobots.filter((robot) => {
+  const searchField = useSelector((state) => state.searchRobots.searchField);
+  const robots = useSelector((state) => state.requestRobots.robots);
+  const isPending = useSelector((state) => state.requestRobots.isPending);
+
+  const filteredRobots = robots.filter((robot) => {
     return robot.name.toLowerCase().includes(searchField.toLowerCase());
   });
 
   const onSearchChange = (event) => {
-    setSearchField(event.target.value);
+    dispatch(setSearchField(event.target.value));
   };
 
-  if (robots.length === 0) {
-    return <h1>Loading...</h1>;
-  } else {
-    return (
-      <Provider store={store}>
-        <Layout>
-          <Title title="RoboFriends" />
-          <SearchBox searchChange={onSearchChange} />
-          <Scroll>
-            {robots.length === 0 ? (
-              <h1>Loading...</h1>
-            ) : (
-              <CardList robots={filteredRobots} />
-            )}
-          </Scroll>
-        </Layout>
-      </Provider>
-    );
-  }
+  return (
+    <Layout>
+      <Title title="RoboFriends" />
+      <SearchBox searchChange={onSearchChange} />
+      <Scroll>
+        {isPending ? <h1>Loading...</h1> : <CardList robots={filteredRobots} />}
+      </Scroll>
+    </Layout>
+  );
 }
 
 export default App;
